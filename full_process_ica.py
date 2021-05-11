@@ -18,9 +18,9 @@ print('Finished importing modules.\n')
 rs = 714
 
 # Load data
-train = pd.read_csv('../../data/competition_data/TrainLabels.csv').drop('id', axis = 1)
-validate = pd.read_csv('../../data/competition_data/validation.csv').drop('id', axis = 1)
-test = pd.read_csv('../../data/competition_data/english_test_with_labels - Sheet1.csv').drop('id', axis = 1)
+train = pd.read_csv('./data/competition_data/TrainLabels.csv').drop('id', axis = 1)
+validate = pd.read_csv('./data/competition_data/validation.csv').drop('id', axis = 1)
+test = pd.read_csv('./data/competition_data/english_test_with_labels - Sheet1.csv').drop('id', axis = 1)
 print('Loaded tweets.\n')
 
 tweets = pd.concat([train, validate, test], ignore_index = True)
@@ -78,7 +78,7 @@ np.save('word_embeddings_ICA.npy', embeddings)
 vocabulary_dict = cm.vocabulary
 
 # load our set of tweets for modeling
-tweets2 = pd.read_csv('../../data/COVID19_Dataset-text_labels_only.csv')
+tweets2 = pd.read_csv('./data/COVID19_Dataset-text_labels_only.csv')
 print('Loaded new set of tweets for modeling.\n')
 
 # get tweet vectors
