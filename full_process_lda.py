@@ -9,6 +9,7 @@ from sklearn.svm import SVC
 from sklearn.decomposition import LatentDirichletAllocation#, DictionaryLearning
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import KFold
+from sklearn.pipeline import Pipeline
 
 print('Finished importing modules.\n')
 
@@ -36,6 +37,7 @@ print('Instantiated ContextMatrix class.\n')
 
 # Fit vocabulary using full set of tweets & output word-context matrix
 wcm = cm.fit_transform(tweets['tweet'])
+np.save('wcm.npy', wcm)
 print('Completed fit_transform method.\n')
 print('Created word-word co-occurrence matrix of shape {}.\n'.format(wcm.shape))
 
@@ -47,15 +49,20 @@ if not np.isnan(wcm).any():
 #scaler = StandardScaler()
 # scale word context matrix to be non-negative (NMF, LDA)
 scaler = MinMaxScaler()
-X_std = scaler.fit_transform(wcm)
-print('Standardized word-context matrix.\n')
+#X_std = scaler.fit_transform(wcm)
+#print('Standardized word-context matrix.\n')
 
 
 # Get word embeddings
 
 # Instantiate matrix factorization class
-mf = LatentDirichletAllocation(n_components=250, random_state=rs)
-embeddings = mf.fit_transform(X_std)
+mf = LatentDirichletAllocation(n_components=250, random_state=rs, learning_method='online', learning_offset=1)
+#embeddings = mf.fit_transform(X_std)
+
+print('Instantiated scaler & matrix factorization algo.')
+
+pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)])
+embeddings = pipe.fit_transform(wcm)
 
 print('Created LDA word embeddings of shape {}.\n'.format(embeddings.shape))
 
