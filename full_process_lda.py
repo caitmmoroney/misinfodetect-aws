@@ -10,8 +10,10 @@ from sklearn.decomposition import LatentDirichletAllocation#, DictionaryLearning
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
+from datetime import datetime
 
 print('Finished importing modules.\n')
+start_time = datetime.now()
 
 
 # Set random state
@@ -28,6 +30,7 @@ print('There are {} tweets.\n'.format(tweets.shape[0]))
 
 
 # Create word-context matrix
+wcm_t0 = datetime.now()
 cm = ContextMatrix(window_size = 15,
                    lowercase = True,
                    lemmatize = True,
@@ -37,8 +40,8 @@ print('Instantiated ContextMatrix class.\n')
 
 # Fit vocabulary using full set of tweets & output word-context matrix
 wcm = cm.fit_transform(tweets['tweet'])
+print(f'Completed fit_transform method in {(datetime.now() - wcm_t0).total_seconds()} seconds.\n')
 np.save('wcm.npy', wcm)
-print('Completed fit_transform method.\n')
 print('Created word-word co-occurrence matrix of shape {}.\n'.format(wcm.shape))
 
 # Check for NaN's
@@ -62,9 +65,10 @@ mf = LatentDirichletAllocation(n_components=250, random_state=rs, learning_metho
 print('Instantiated scaler & matrix factorization algo.')
 
 pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)])
+pipe_t0 = datetime.now()
 embeddings = pipe.fit_transform(wcm)
 
-print('Created LDA word embeddings of shape {}.\n'.format(embeddings.shape))
+print(f'Created LDA word embeddings of shape {embeddings.shape} in {(datetime.now() - pipe_t0).total_seconds()} seconds.\n')
 
 
 # Get tweet embeddings from word embeddings
@@ -77,9 +81,10 @@ tweets2 = pd.read_csv('./data/COVID19_Dataset-text_labels_only.csv')
 print('Loaded new set of tweets for modeling.\n')
 
 # get tweet vectors
+get_vectors_t0 = datetime.now()
 X = get_text_vectors(embeddings, vocabulary_dict, tweets2['Tweet'])
 np.save('tweet_embeddings_LDA.npy', X)
-print('Embedded new set of tweets for modeling & saved tweet embeddings.\n')
+print(f'Embedded new set of tweets for modeling & saved tweet embeddings in {(datetime.now() - get_vectors_t0).total_seconds()} seconds.\n')
 
 
 # BINARY CLASSIFICATION
@@ -272,5 +277,7 @@ LDA_test_mean = get_test_means(LDA_full)
 LDA_test_mean.to_csv('LDA_svm_testmean_results.csv')
 
 print('Saved test performance averages.\n')
+
+print(f'Total run time was {(datetime.now() - start_time).total_seconds()} seconds')
 
 
