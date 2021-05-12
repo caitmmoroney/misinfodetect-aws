@@ -10,53 +10,67 @@ from sklearn.decomposition import FastICA#,LatentDirichletAllocation, Dictionary
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import KFold
 from scipy.stats import skew
+from sklearn.pipeline import Pipeline
+from datetime import datetime
 
 print('Finished importing modules.\n')
+start_time = datetime.now()
 
 
 # Set random state
 rs = 714
 
 # Load data
-train = pd.read_csv('./data/competition_data/TrainLabels.csv').drop('id', axis = 1)
-validate = pd.read_csv('./data/competition_data/validation.csv').drop('id', axis = 1)
-test = pd.read_csv('./data/competition_data/english_test_with_labels - Sheet1.csv').drop('id', axis = 1)
-print('Loaded tweets.\n')
+# train = pd.read_csv('./data/competition_data/TrainLabels.csv').drop('id', axis = 1)
+# validate = pd.read_csv('./data/competition_data/validation.csv').drop('id', axis = 1)
+# test = pd.read_csv('./data/competition_data/english_test_with_labels - Sheet1.csv').drop('id', axis = 1)
+# print('Loaded tweets.\n')
 
-tweets = pd.concat([train, validate, test], ignore_index = True)
-print('There are {} tweets.\n'.format(tweets.shape[0]))
+# tweets = pd.concat([train, validate, test], ignore_index = True)
+# print('There are {} tweets.\n'.format(tweets.shape[0]))
 
 
-# Create word-context matrix
-cm = ContextMatrix(window_size = 15,
-                   lowercase = True,
-                   lemmatize = True,
-                   pmi = True,
-                   laplace_smoothing = 2) # shifted by 2
-print('Instantiated ContextMatrix class.\n')
+# # Create word-context matrix
+# cm = ContextMatrix(window_size = 15,
+#                    lowercase = True,
+#                    lemmatize = True,
+#                    pmi = True,
+#                    laplace_smoothing = 2) # shifted by 2
+# print('Instantiated ContextMatrix class.\n')
 
-# Fit vocabulary using full set of tweets & output word-context matrix
-wcm = cm.fit_transform(tweets['tweet'])
-print('Completed fit_transform method.\n')
-print('Created word-word co-occurrence matrix of shape {}.\n'.format(wcm.shape))
+# # Fit vocabulary using full set of tweets & output word-context matrix
+# wcm = cm.fit_transform(tweets['tweet'])
+# print('Completed fit_transform method.\n')
+# print('Created word-word co-occurrence matrix of shape {}.\n'.format(wcm.shape))
 
-# Check for NaN's
-if not np.isnan(wcm).any():
-    print('There are no NaN values in the word-context matrix.\n')
+# # Check for NaN's
+# if not np.isnan(wcm).any():
+#     print('There are no NaN values in the word-context matrix.\n')
+
+wcm = np.load('wcm.npy')
+print('Loaded word-context array.')
 
 # Standard scaling of word context matrix (DL, ICA)
 scaler = StandardScaler()
 # scale word context matrix to be non-negative (NMF, LDA)
 #scaler = MinMaxScaler()
-X_std = scaler.fit_transform(wcm)
-print('Standardized word-context matrix.\n')
+# X_std = scaler.fit_transform(wcm)
+# print('Standardized word-context matrix.\n')
 
 
 # Get word embeddings
 
 # Instantiate matrix factorization class
 mf = FastICA(n_components=250, random_state=rs)
-S = mf.fit_transform(X_std) # S matrix
+# S = mf.fit_transform(X_std) # S matrix
+
+print('Instantiated scaler & matrix factorization algo.')
+
+pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)], verbose=True)
+pipe_t0 = datetime.now()
+S = pipe.fit_transform(wcm)
+np.save('S_matrix.npy', S)
+
 embeddings = mf.mixing_ # A matrix
 
 # skewness correction
@@ -68,7 +82,8 @@ ST_negSkew = np.argwhere(ST_skewness < 0)[:,0]
 
 embeddings[:,ST_negSkew] *= -1
 
-print('Created ICA word embeddings of shape {}.\n'.format(embeddings.shape))
+print(f'Created ICA word embeddings of shape {embeddings.shape} in {(datetime.now() - pipe_t0).total_seconds()} seconds.\n')
+# print('Created ICA word embeddings of shape {}.\n'.format(embeddings.shape))
 np.save('word_embeddings_ICA.npy', embeddings)
 
 
