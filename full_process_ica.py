@@ -12,6 +12,7 @@ from sklearn.model_selection import KFold
 from scipy.stats import skew
 from sklearn.pipeline import Pipeline
 from datetime import datetime
+import pickle
 
 print('Finished importing modules.\n')
 start_time = datetime.now()
@@ -47,49 +48,55 @@ rs = 714
 # if not np.isnan(wcm).any():
 #     print('There are no NaN values in the word-context matrix.\n')
 
-wcm = np.load('wcm.npy')
-print('Loaded word-context array.')
+# wcm = np.load('wcm.npy')
+# print('Loaded word-context array.')
 
-# Standard scaling of word context matrix (DL, ICA)
-scaler = StandardScaler()
-# scale word context matrix to be non-negative (NMF, LDA)
-#scaler = MinMaxScaler()
-# X_std = scaler.fit_transform(wcm)
-# print('Standardized word-context matrix.\n')
+# # Standard scaling of word context matrix (DL, ICA)
+# scaler = StandardScaler()
+# # scale word context matrix to be non-negative (NMF, LDA)
+# #scaler = MinMaxScaler()
+# # X_std = scaler.fit_transform(wcm)
+# # print('Standardized word-context matrix.\n')
 
 
-# Get word embeddings
+# # Get word embeddings
 
-# Instantiate matrix factorization class
-mf = FastICA(n_components=250, random_state=rs)
-# S = mf.fit_transform(X_std) # S matrix
+# # Instantiate matrix factorization class
+# mf = FastICA(n_components=250, random_state=rs)
+# # S = mf.fit_transform(X_std) # S matrix
 
-print('Instantiated scaler & matrix factorization algo.')
+# print('Instantiated scaler & matrix factorization algo.')
 
-pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)], verbose=True)
-pipe_t0 = datetime.now()
-ST = pipe.fit_transform(wcm)
-np.save('S_matrix.npy', ST)
+# pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)], verbose=True)
+# pipe_t0 = datetime.now()
+# ST = pipe.fit_transform(wcm)
+# np.save('S_matrix.npy', ST)
 
-embeddings = mf.mixing_ # A matrix
-np.save('A_matrix.npy', embeddings)
+# embeddings = mf.mixing_ # A matrix
+# np.save('A_matrix.npy', embeddings)
 
-# skewness correction
-ST_skewness = skew(ST, axis=0) # shape N
+# # skewness correction
+# ST_skewness = skew(ST, axis=0) # shape N
 
-ST_negSkew = np.argwhere(ST_skewness < 0)[:,0]
+# ST_negSkew = np.argwhere(ST_skewness < 0)[:,0]
 
-embeddings[:,ST_negSkew] *= -1
+# embeddings[:,ST_negSkew] *= -1
 
-print(f'Created ICA word embeddings of shape {embeddings.shape} in {(datetime.now() - pipe_t0).total_seconds()} seconds.\n')
-# print('Created ICA word embeddings of shape {}.\n'.format(embeddings.shape))
-np.save('word_embeddings_ICA.npy', embeddings)
+# print(f'Created ICA word embeddings of shape {embeddings.shape} in {(datetime.now() - pipe_t0).total_seconds()} seconds.\n')
+# # print('Created ICA word embeddings of shape {}.\n'.format(embeddings.shape))
+# np.save('word_embeddings_ICA.npy', embeddings)
+
+
+# Load word embeddings
+embeddings = np.load('word_embeddings_ICA.npy')
 
 
 # Get tweet embeddings from word embeddings
 
 # get vocab dict for union of vocabulary
-vocabulary_dict = cm.vocabulary
+# vocabulary_dict = cm.vocabulary
+with open('tweet_vocab_dict.pkl', 'rb') as f:
+    vocabulary_dict = pickle.load(f)
 
 # load our set of tweets for modeling
 tweets2 = pd.read_csv('./data/COVID19_Dataset-text_labels_only.csv')
