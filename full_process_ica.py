@@ -69,7 +69,7 @@ print('Instantiated scaler & matrix factorization algo.')
 pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)], verbose=True)
 pipe_t0 = datetime.now()
 ST = pipe.fit_transform(wcm)
-np.save('S_matrix.npy', S)
+np.save('S_matrix.npy', ST)
 
 embeddings = mf.mixing_ # A matrix
 np.save('A_matrix.npy', embeddings)
