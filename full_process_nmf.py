@@ -86,7 +86,7 @@ with open('tweet_vocab_dict.pkl', 'rb') as f:
     vocabulary_dict = pickle.load(f)
 
 # load our set of tweets for modeling
-tweets2 = pd.read_csv('../../data/COVID19_Dataset-text_labels_only.csv')
+tweets2 = pd.read_csv('./data/COVID19_Dataset-text_labels_only.csv')
 print('Loaded new set of tweets for modeling.\n')
 
 # get tweet vectors
