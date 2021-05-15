@@ -11,6 +11,7 @@ from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, reca
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from datetime import datetime
+import pickle
 
 print('Finished importing modules.\n')
 start_time = datetime.now()
@@ -19,65 +20,70 @@ start_time = datetime.now()
 # Set random state
 rs = 714
 
-# # Load data
-# train = pd.read_csv('../../data/competition_data/TrainLabels.csv').drop('id', axis = 1)
-# validate = pd.read_csv('../../data/competition_data/validation.csv').drop('id', axis = 1)
-# test = pd.read_csv('../../data/competition_data/english_test_with_labels - Sheet1.csv').drop('id', axis = 1)
-# print('Loaded tweets.\n')
+# # # Load data
+# # train = pd.read_csv('../../data/competition_data/TrainLabels.csv').drop('id', axis = 1)
+# # validate = pd.read_csv('../../data/competition_data/validation.csv').drop('id', axis = 1)
+# # test = pd.read_csv('../../data/competition_data/english_test_with_labels - Sheet1.csv').drop('id', axis = 1)
+# # print('Loaded tweets.\n')
 
-# tweets = pd.concat([train, validate, test], ignore_index = True)
-# print('There are {} tweets.\n'.format(tweets.shape[0]))
-
-
-# # Create word-context matrix
-# cm = ContextMatrix(window_size = 15,
-#                    lowercase = True,
-#                    lemmatize = True,
-#                    pmi = True,
-#                    laplace_smoothing = 2) # shifted by 2
-# print('Instantiated ContextMatrix class.\n')
-
-# # Fit vocabulary using full set of tweets & output word-context matrix
-# wcm = cm.fit_transform(tweets['tweet'])
-# print('Completed fit_transform method.\n')
-# print('Created word-word co-occurrence matrix of shape {}.\n'.format(wcm.shape))
-
-wcm = np.load('wcm.npy')
-print('Loaded word-context array.')
-
-# Check for NaN's
-if not np.isnan(wcm).any():
-    print('There are no NaN values in the word-context matrix.\n')
-
-# Standard scaling of word context matrix (DL, ICA)
-#scaler = StandardScaler()
-# scale word context matrix to be non-negative (NMF, LDA)
-scaler = MinMaxScaler()
-# X_std = scaler.fit_transform(wcm)
-# print('Standardized word-context matrix.\n')
+# # tweets = pd.concat([train, validate, test], ignore_index = True)
+# # print('There are {} tweets.\n'.format(tweets.shape[0]))
 
 
-# Get word embeddings
+# # # Create word-context matrix
+# # cm = ContextMatrix(window_size = 15,
+# #                    lowercase = True,
+# #                    lemmatize = True,
+# #                    pmi = True,
+# #                    laplace_smoothing = 2) # shifted by 2
+# # print('Instantiated ContextMatrix class.\n')
 
-# Instantiate matrix factorization class
-mf = NMF(n_components=250, random_state=rs)
-# embeddings = mf.fit_transform(X_std)
+# # # Fit vocabulary using full set of tweets & output word-context matrix
+# # wcm = cm.fit_transform(tweets['tweet'])
+# # print('Completed fit_transform method.\n')
+# # print('Created word-word co-occurrence matrix of shape {}.\n'.format(wcm.shape))
 
-print('Instantiated scaler & matrix factorization algo.')
+# wcm = np.load('wcm.npy')
+# print('Loaded word-context array.')
 
-pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)], verbose=True)
-pipe_t0 = datetime.now()
-embeddings = pipe.fit_transform(wcm)
-np.save('word_embeddings_NMF.npy', embeddings)
+# # Check for NaN's
+# if not np.isnan(wcm).any():
+#     print('There are no NaN values in the word-context matrix.\n')
 
-# print('Created NMF word embeddings of shape {}.\n'.format(embeddings.shape))
-print(f'Created NMF word embeddings of shape {embeddings.shape} in {(datetime.now() - pipe_t0).total_seconds()} seconds.\n')
+# # Standard scaling of word context matrix (DL, ICA)
+# #scaler = StandardScaler()
+# # scale word context matrix to be non-negative (NMF, LDA)
+# scaler = MinMaxScaler()
+# # X_std = scaler.fit_transform(wcm)
+# # print('Standardized word-context matrix.\n')
+
+
+# # Get word embeddings
+
+# # Instantiate matrix factorization class
+# mf = NMF(n_components=250, random_state=rs)
+# # embeddings = mf.fit_transform(X_std)
+
+# print('Instantiated scaler & matrix factorization algo.')
+
+# pipe = Pipeline(steps=[('scaler', scaler), ('matfac', mf)], verbose=True)
+# pipe_t0 = datetime.now()
+# embeddings = pipe.fit_transform(wcm)
+# np.save('word_embeddings_NMF.npy', embeddings)
+
+# # print('Created NMF word embeddings of shape {}.\n'.format(embeddings.shape))
+# print(f'Created NMF word embeddings of shape {embeddings.shape} in {(datetime.now() - pipe_t0).total_seconds()} seconds.\n')
 
 
 # Get tweet embeddings from word embeddings
 
+# Load word embeddings
+embeddings = np.load('word_embeddings_NMF.npy')
+
 # get vocab dict for union of vocabulary
-vocabulary_dict = cm.vocabulary
+# vocabulary_dict = cm.vocabulary
+with open('tweet_vocab_dict.pkl', 'rb') as f:
+    vocabulary_dict = pickle.load(f)
 
 # load our set of tweets for modeling
 tweets2 = pd.read_csv('../../data/COVID19_Dataset-text_labels_only.csv')
