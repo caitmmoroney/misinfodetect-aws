@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Word-context matrix (large numpy file)
+wcm.npy
