@@ -11,6 +11,7 @@ from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, reca
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from datetime import datetime
+import pickle
 
 print('Finished importing modules.\n')
 start_time = datetime.now()
