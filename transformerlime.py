@@ -171,7 +171,7 @@ class TransformerLIME(object):
         self.embedder.fit(self.raw_df['Tweet'])
 
         # Load embeddings
-        embedding_file = embedding_path + self.clean_name
+        embedding_file = embedding_path + self.clean_name + '.npy'
         self.tweet_embeddings = np.load(embedding_file)
 
         # LIME explanations
