@@ -168,7 +168,7 @@ class TransformerLIME(object):
         self.clean_name = model_name.split('/')[-1]
 
         self.embedder = Text2Embed(model_name)
-        self.embedder.fit(raw_df['Tweet'])
+        self.embedder.fit(self.raw_df['Tweet'])
 
         # Load embeddings
         embedding_file = embedding_path + self.clean_name
