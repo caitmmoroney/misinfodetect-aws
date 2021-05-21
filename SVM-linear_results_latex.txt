@@ -1,0 +1,21 @@
+\begin{tabular}{lrrrr}
+\toprule
+{} &  Accuracy &  Recall &  Precision &     F1 \\
+Method             &           &         &            &        \\
+\midrule
+ICA                &     0.721 &   0.702 &      0.734 &  0.715 \\
+NMF                &     0.773 &   0.853 &      0.738 &  0.789 \\
+DL                 &     0.698 &   0.669 &      0.708 &  0.686 \\
+IVA-mean           &     0.789 &   0.802 &      0.784 &  0.790 \\
+IVA-max            &     0.789 &   0.802 &      0.784 &  0.790 \\
+LDA                &     0.612 &   0.856 &      0.575 &  0.686 \\
+BERT-Large-Uncased &     0.880 &   0.888 &      0.877 &  0.881 \\
+BERT-Large-Cased   &     0.875 &   0.895 &      0.863 &  0.876 \\
+BERT-Base-Uncased  &     0.868 &   0.883 &      0.858 &  0.869 \\
+BERT-Base-Cased    &     0.866 &   0.889 &      0.855 &  0.870 \\
+RoBERTa-Base       &     0.873 &   0.862 &      0.888 &  0.873 \\
+RoBERTa-Large      &     0.886 &   0.891 &      0.883 &  0.886 \\
+ELECTRA-Base       &     0.848 &   0.837 &      0.861 &  0.847 \\
+ELECTRA-Large      &     0.832 &   0.838 &      0.828 &  0.832 \\
+\bottomrule
+\end{tabular}
