@@ -212,7 +212,9 @@ class TransformerLIME(object):
 
                 # get model predictions
                 predictions = svc.predict(subset_embeddings)
-                [model_predictions[kernel] += [(idx, pred)] for idx, pred in zip(index_vals, predictions.tolist())]
+                # [model_predictions[kernel] += [(idx, pred)] for idx, pred in zip(index_vals, predictions.tolist())]
+                for idx, pred in zip(index_vals, predictions.tolist()):
+                    model_predictions[kernel] += [(idx, pred)]
                 
                 # initialize empty lists
                 lime_expl = [] # capture lime explanations for each fold
