@@ -185,9 +185,9 @@ class ModelExperiment(object):
 
 if __name__ == '__main__':
 	method_name_mapping = {
-		'google/electra-base-discriminator': "ELECTRA-Base",
+		'electra-base-discriminator': "ELECTRA-Base",
 		'roberta-base': "RoBERTa-Base",
-		'google/electra-large-discriminator': "ELECTRA-Large",
+		'electra-large-discriminator': "ELECTRA-Large",
 		'bert-base-cased': "BERT-Base-Cased",
 		'roberta-large': "RoBERTa-Large",
 		'bert-base-uncased': "BERT-Base-Uncased",
