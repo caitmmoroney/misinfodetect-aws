@@ -198,7 +198,7 @@ class TransformerLIME(object):
                 svc = joblib.load(f'./fold_estimators/SVM-{kernel}_{self.clean_name}_Fold{fold_num}.joblib')
                 
                 # create pipeline
-                c = make_pipeline(embedder, svc)
+                c = make_pipeline(self.embedder, svc)
 
                 # instantiate LIME explainer
                 explainer = LimeTextExplainer(class_names = ['Reliable', 'Unreliable'])
