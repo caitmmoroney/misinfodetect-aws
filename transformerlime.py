@@ -155,14 +155,14 @@ class Text2Embed(TransformerMixin):
 
 # Define TransformerLIME class to do the rest of the work
 class TransformerLIME(object):
-    def __init__(self, model_name: str, data_file: str = 'data/COVID19_Dataset-CM-ZB-complete with sources.xls', embedding_path: str = 'data/transformer_embeddings/', n_cv_folds = 10, kernels = ['rbf', 'linear', 'poly', 'sigmoid']):
+    def __init__(self, model_name: str, data_file: str = 'data/COVID19_Dataset-CM-ZB-complete with sources_wTestFold.csv', embedding_path: str = 'data/transformer_embeddings/', n_cv_folds = 10, kernels = ['rbf', 'linear', 'poly', 'sigmoid']):
         self.n_cv_folds = n_cv_folds
         self.model_predictions = None
         self.kernels = kernels
         
         # Load data
         self.data_file = data_file
-        self.raw_df = pd.read_excel(data_file)
+        self.raw_df = pd.read_csv(data_file)
         self.labels = self.raw_df["Is_Unreliable"].to_numpy()
         self.model_name = model_name
         self.clean_name = model_name.split('/')[-1]
