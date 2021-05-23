@@ -155,10 +155,10 @@ class Text2Embed(TransformerMixin):
 
 # Define TransformerLIME class to do the rest of the work
 class TransformerLIME(object):
-    def __init__(self, model_name: str, data_file: str = 'data/COVID19_Dataset-CM-ZB-complete with sources.xls', embedding_path: str = 'data/transformer_embeddings/', n_cv_folds = 10):
+    def __init__(self, model_name: str, data_file: str = 'data/COVID19_Dataset-CM-ZB-complete with sources.xls', embedding_path: str = 'data/transformer_embeddings/', n_cv_folds = 10, kernels = ['rbf', 'linear', 'poly', 'sigmoid']):
         self.n_cv_folds = n_cv_folds
         self.model_predictions = None
-        self.kernels = ['rbf', 'linear', 'poly', 'sigmoid']
+        self.kernels = kernels
         
         # Load data
         self.data_file = data_file
@@ -267,7 +267,7 @@ class TransformerLIME(object):
 
 
 if __name__ == '__main__':
-    tfLIME = TransformerLIME(model_name = 'bert-base-uncased')
+    tfLIME = TransformerLIME(model_name = 'bert-base-uncased', kernels = ['rbf', 'linear'])
     tfLIME.main()
 
 
