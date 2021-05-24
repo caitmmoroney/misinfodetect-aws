@@ -124,7 +124,7 @@ class ModelExperiment(object):
 
 	# Define experiment function
 	def experiment(self, X, y):
-		self.svr = svm.SVC(kernel=self.kernel)
+		self.svr = svm.SVC(kernel=self.kernel, probability=True)
 		self.param_grid = {"C": [0.1, 1, 10, 100], "gamma": [1, 0.1, 0.01, 0.001]}
 
 		self.inner_cv = KFold(n_splits=self.inner_cv_nsplits, shuffle=True, random_state=self.RANDOM_STATE)
@@ -231,7 +231,7 @@ if __name__ == '__main__':
 		return result_latex
 
 	models = ['ICA', 'NMF', 'DL', 'IVA-mean', 'IVA-max', 'LDA', 'bert-large-uncased', 'bert-large-cased', 'bert-base-uncased', 'bert-base-cased', 'roberta-base', 'roberta-large', 'google/electra-base-discriminator', 'google/electra-large-discriminator']
-	kernels = ['poly', 'sigmoid']#['rbf', 'linear', 'poly', 'sigmoid']
+	kernels = ['rbf', 'linear', 'sigmoid', 'poly']
 	for kernel in kernels:
 		complete_scores = dict()
 		for mname in models:
