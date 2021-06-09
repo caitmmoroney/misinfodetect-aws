@@ -6,10 +6,10 @@ import numpy as np
 from sklearn import svm
 from sklearn.model_selection import KFold, GridSearchCV, cross_validate
 
-from transformers import BertModel, BertConfig, BertTokenizer
+#from transformers import BertModel, BertConfig, BertTokenizer
 from transformers import RobertaModel, RobertaConfig, RobertaTokenizer
-from transformers import ElectraModel, ElectraConfig, ElectraTokenizer
-from transformers import XLNetModel, XLNetTokenizer
+#from transformers import ElectraModel, ElectraConfig, ElectraTokenizer
+#from transformers import XLNetModel, XLNetTokenizer
 import torch
 
 import re
@@ -230,8 +230,8 @@ if __name__ == '__main__':
 
 		return result_latex
 
-	models = ['ICA', 'NMF', 'DL', 'IVA-mean', 'IVA-max', 'LDA', 'bert-large-uncased', 'bert-large-cased', 'bert-base-uncased', 'bert-base-cased', 'roberta-base', 'roberta-large', 'google/electra-base-discriminator', 'google/electra-large-discriminator']
-	kernels = ['rbf', 'linear', 'sigmoid', 'poly']
+	models = ['ICA', 'roberta-large']
+	kernels = ['linear']
 	for kernel in kernels:
 		complete_scores = dict()
 		for mname in models:
