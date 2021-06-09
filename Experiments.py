@@ -182,6 +182,11 @@ class ModelExperiment(object):
 		for i, est in enumerate(self.estimators, start=1): # folds 1-10 instead of 0-9
 			joblib.dump(est, f'./fold_estimators/SVM-{self.kernel}_{clean_name}_Fold{i}.joblib')
 
+	# Save the predictions
+	def save_pred(self):
+		# for each fold in outer CV, save predictions of estimator for corresponding test set
+		pass
+
 
 if __name__ == '__main__':
 	method_name_mapping = {
