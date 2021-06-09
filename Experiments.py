@@ -104,6 +104,7 @@ class ModelExperiment(object):
 		elif self.embedding_mode == 'latent_var':
 			try:
 				self.embeddings = np.load(f'{self.embedding_path}/tweet_embed_{self.model_name}.npy')
+				print('Tweet embeddings loaded.\n')
 			except:
 				print(f'The file {self.embedding_path}/tweet_embed_{self.model_name} does not exist.')
 
@@ -235,12 +236,12 @@ if __name__ == '__main__':
 
 		return result_latex
 
-	models = ['ICA', 'roberta-large']
+	models = ['roberta-large', 'ICA']
 	kernels = ['linear']
 	for kernel in kernels:
 		complete_scores = dict()
 		for mname in models:
-			if mname in models[:6]:
+			if mname in ['ICA', 'NMF', 'LDA', 'DL', 'IVA-mean', 'IVA-max']:
 				embedding_mode = 'latent_var'
 				embedding_path = './data/latent_var_embeddings'
 			else:
