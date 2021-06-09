@@ -268,7 +268,7 @@ class TransformerLIME(object):
 
 
 if __name__ == '__main__':
-    tfLIME = TransformerLIME(model_name = 'bert-base-uncased', kernels = ['rbf', 'linear'])
+    tfLIME = TransformerLIME(model_name = 'roberta-large', kernels = ['linear'])
     tfLIME.main()
 
 
