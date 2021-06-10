@@ -83,13 +83,23 @@ class Text2Embed(TransformerMixin):
         model = self.model_definition["model_module"].from_pretrained(self.model_definition["model_name"])
         
         embeddings = []
-        for text in new_corpus:
-            inputs = tokenizer(text, return_tensors="pt")
+
+        if type(new_corpus) == str:
+            inputs = tokenizer(new_corpus, return_tensors="pt")
             outputs = model(**inputs)
             print(outputs)
             last_hidden_states = outputs.last_hidden_state[0]
             mean = torch.mean(last_hidden_states, 0)
             embeddings.append(mean.detach().numpy())
+
+        elif type(new_corpus) == list:
+            for text in new_corpus:
+                inputs = tokenizer(text, return_tensors="pt")
+                outputs = model(**inputs)
+                print(outputs)
+                last_hidden_states = outputs.last_hidden_state[0]
+                mean = torch.mean(last_hidden_states, 0)
+                embeddings.append(mean.detach().numpy())
 
         self.text_embeddings = np.array(embeddings)
         
@@ -215,7 +225,7 @@ class TransformerLIME(object):
                 # y_predict = predictions[idx]
                 num_words = len(re.split("\W+", tweet))
                 startt = time.process_time() # to track how long it takes for LIME to form the explanation
-                exp = explainer.explain_instance([tweet], c.predict_proba, num_features = num_words)
+                exp = explainer.explain_instance(tweet, c.predict_proba, num_features = num_words)
                 endt = time.process_time()
                 dur = endt - startt
 
