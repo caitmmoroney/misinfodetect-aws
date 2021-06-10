@@ -202,7 +202,7 @@ class TransformerLIME(object):
             explainer = LimeTextExplainer(class_names = ['Reliable', 'Unreliable'])
             
             # subset data by fold i test set
-            subset_text = self.raw_df[self.raw_df['Test_Fold'] == fold_num]
+            subset_text = self.raw_df[self.raw_df['Test_Fold'] == self.fold_num]
             index_vals = list(subset_text.index)
             subset_text = subset_text['Tweet'] # pd.Series
             #subset_text = subset_text.reset_index(drop=True)['Tweet']
@@ -220,6 +220,9 @@ class TransformerLIME(object):
             lime_time = [] # capture lime processing time for each fold
 
             for i in range(len(predictions)):
+                if (i+1) % 3 == 0:
+                    print(f'Working on tweet {i+1} of {len(predictions)}.')
+
                 idx = index_vals[i]
                 
                 # compute lime explanation
