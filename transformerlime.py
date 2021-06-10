@@ -3,11 +3,11 @@ import pandas as pd
 import numpy as np
 import nltk
 import torch
-from transformers import BertModel, BertConfig, BertTokenizer
+# from transformers import BertModel, BertConfig, BertTokenizer
 from transformers import RobertaModel, RobertaConfig, RobertaTokenizer
-from transformers import ElectraModel, ElectraConfig, ElectraTokenizer
-from transformers import XLNetModel, XLNetTokenizer
-import matplotlib.pyplot as plt
+# from transformers import ElectraModel, ElectraConfig, ElectraTokenizer
+# from transformers import XLNetModel, XLNetTokenizer
+# import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 from sklearn.base import TransformerMixin
 from lime import lime_text
@@ -18,25 +18,8 @@ import re
 import pickle
 import time
 import joblib
-from multiprocessing import Process, Manager
+# from multiprocessing import Process, Manager
 print('loaded imports')
-
-def lime_results(lime_expl, lime_expl_list, lime_time_list, idx, text_data, pipe, lime_explainer):
-    # compute lime explanation
-    #tweet = text_data['Tweet'][idx]
-    tweet = text_data
-    # y_true = targets[idx]
-    # y_predict = predictions[idx]
-    num_words = len(re.split("\W+", tweet))
-    startt = time.process_time() # to track how long it takes for LIME to form the explanation
-    exp = lime_explainer.explain_instance(tweet, pipe.predict_proba, num_features = num_words)
-    endt = time.process_time()
-    dur = endt - startt
-
-    # save explanations
-    lime_time_list.append(dur)
-    lime_expl.append((idx, exp))
-    lime_expl_list.append((idx, exp.as_list()))
 
 
 class Text2Embed(TransformerMixin):
@@ -100,12 +83,28 @@ class Text2Embed(TransformerMixin):
         model = self.model_definition["model_module"].from_pretrained(self.model_definition["model_name"])
         
         embeddings = []
-        for text in new_corpus:
-            inputs = tokenizer(text, return_tensors="pt")
+
+        if type(new_corpus) == str:
+            inputs = tokenizer(new_corpus, return_tensors="pt")
             outputs = model(**inputs)
+            print(outputs)
             last_hidden_states = outputs.last_hidden_state[0]
             mean = torch.mean(last_hidden_states, 0)
             embeddings.append(mean.detach().numpy())
+
+        elif type(new_corpus) == list:
+            for i in range(len(new_corpus)):
+                print(f'Working on text {i+1}.')
+                text = new_corpus[i]
+                print(text)
+                inputs = tokenizer(text, return_tensors="pt")
+                outputs = model(**inputs)
+                print(type(outputs))
+                print(len(outputs))
+                print(outputs)
+                last_hidden_states = outputs.last_hidden_state[0]
+                mean = torch.mean(last_hidden_states, 0)
+                embeddings.append(mean.detach().numpy())
 
         self.text_embeddings = np.array(embeddings)
         
@@ -156,8 +155,8 @@ class Text2Embed(TransformerMixin):
 
 # Define TransformerLIME class to do the rest of the work
 class TransformerLIME(object):
-    def __init__(self, model_name: str, data_file: str = 'data/COVID19_Dataset-CM-ZB-complete with sources_wTestFold.csv', embedding_path: str = 'data/transformer_embeddings/', n_cv_folds = 10, kernels = ['rbf', 'linear', 'poly', 'sigmoid']):
-        self.n_cv_folds = n_cv_folds
+    def __init__(self, model_name: str, data_file: str = 'data/COVID19_Dataset-CM-ZB-complete with sources_wTestFold.csv', embedding_path: str = 'data/transformer_embeddings/', fold_num = 1, kernels = ['rbf', 'linear', 'poly', 'sigmoid']):
+        self.fold_num = fold_num
         self.model_predictions = None
         self.kernels = kernels
         
@@ -191,62 +190,61 @@ class TransformerLIME(object):
             self.lime_explanations[kernel] = []
             self.lime_list_explanations[kernel] = []
             self.lime_times[kernel] = []
+
+            # load trained classification model
+            svc = joblib.load(f'./fold_estimators/SVM-{kernel}_{self.clean_name}_Fold{self.fold_num}.joblib')
             
-            for i in range(self.n_cv_folds): # iterate over model for each cv fold
-                fold_num = i+1
+            # create pipeline
+            c = make_pipeline(self.embedder, svc)
+
+            # instantiate LIME explainer
+            explainer = LimeTextExplainer(class_names = ['Reliable', 'Unreliable'])
+            
+            # subset data by fold i test set
+            subset_text = self.raw_df[self.raw_df['Test_Fold'] == self.fold_num]
+            index_vals = list(subset_text.index)
+            subset_text = subset_text['Tweet'] # pd.Series
+            #subset_text = subset_text.reset_index(drop=True)['Tweet']
+            subset_embeddings = self.tweet_embeddings[index_vals,:]
+
+            # get model predictions
+            predictions = svc.predict(subset_embeddings)
+            # [model_predictions[kernel] += [(idx, pred)] for idx, pred in zip(index_vals, predictions.tolist())]
+            for idx, pred in zip(index_vals, predictions.tolist()):
+                model_predictions[kernel] += [(idx, pred)]
+            
+            # initialize empty lists
+            lime_expl = [] # capture lime explanations for each fold
+            lime_expl_as_list = [] # capture lime explanations (as lists) for each fold
+            lime_time = [] # capture lime processing time for each fold
+
+            for i in range(len(predictions)):
+                if (i+1) % 3 == 0:
+                    print(f'Working on tweet {i+1} of {len(predictions)}.')
+
+                idx = index_vals[i]
                 
-                # load trained classification model
-                svc = joblib.load(f'./fold_estimators/SVM-{kernel}_{self.clean_name}_Fold{fold_num}.joblib')
-                
-                # create pipeline
-                c = make_pipeline(self.embedder, svc)
+                # compute lime explanation
+                tweet = subset_text[idx]
+                # y_true = targets[idx]
+                # y_predict = predictions[idx]
+                num_words = len(re.split("\W+", tweet))
+                startt = time.process_time() # to track how long it takes for LIME to form the explanation
+                exp = explainer.explain_instance(tweet, c.predict_proba, num_features = num_words)
+                endt = time.process_time()
+                dur = endt - startt
 
-                # instantiate LIME explainer
-                explainer = LimeTextExplainer(class_names = ['Reliable', 'Unreliable'])
-                
-                # subset data by fold i test set
-                subset_text = self.raw_df[self.raw_df['Test_Fold'] == fold_num]
-                index_vals = list(subset_text.index)
-                subset_text = subset_text['Tweet'] # pd.Series
-                #subset_text = subset_text.reset_index(drop=True)['Tweet']
-                subset_embeddings = self.tweet_embeddings[index_vals,:]
+                # save explanations
+                lime_time.append(dur)
+                lime_expl.append((idx, exp))
+                lime_expl_as_list.append((idx, exp.as_list()))
 
-                # get model predictions
-                predictions = svc.predict(subset_embeddings)
-                # [model_predictions[kernel] += [(idx, pred)] for idx, pred in zip(index_vals, predictions.tolist())]
-                for idx, pred in zip(index_vals, predictions.tolist()):
-                    model_predictions[kernel] += [(idx, pred)]
-                
-                # initialize empty lists
-                lime_expl = [] # capture lime explanations for each fold
-                lime_expl_as_list = [] # capture lime explanations (as lists) for each fold
-                lime_time = [] # capture lime processing time for each fold
-
-                with Manager() as manager: # use multiprocessing for LIME explanations
-                    lime_expl = manager.list()  # <-- can be shared between processes.
-                    lime_expl_as_list = manager.list()  # <-- can be shared between processes.
-                    lime_time = manager.list()  # <-- can be shared between processes.
-                    processes = []
-
-                    for i in range(len(predictions)):
-                        idx = index_vals[i]
-                        p = Process(target=lime_results, args=(lime_expl,lime_expl_as_list,lime_time,idx,subset_text[idx],c, explainer)) # pass lists in
-                        p.start()
-                        processes.append(p)
-
-                    for p in processes:
-                        p.join()
-
-                    lime_expl = list(lime_expl)
-                    lime_expl_as_list = list(lime_expl_as_list)
-                    lime_time = list(lime_time)
-                self.lime_times[kernel] += lime_time
-                self.lime_explanations[kernel] += lime_expl
-                self.lime_list_explanations[kernel] += lime_expl_as_list
-                
-                # print average LIME explanation time for each fold x kernel combination
-                print(f'Average LIME computation time: {np.mean(lime_time)}\n')
-
+            self.lime_times[kernel] += lime_time
+            self.lime_explanations[kernel] += lime_expl
+            self.lime_list_explanations[kernel] += lime_expl_as_list
+            
+            # print average LIME explanation time for each fold x kernel combination
+            print(f'Average LIME computation time: {np.mean(lime_time)}\n')
 
         self.model_predictions = model_predictions
 
@@ -264,6 +262,10 @@ class TransformerLIME(object):
             # save LIME explanation time
             with open(f'{self.clean_name}_{kernel}_lime_time.pkl', 'wb') as f:
                 pickle.dump(self.lime_times[kernel], f)
+
+            # save model predictions
+            with open(f'{self.clean_name}_{kernel}_fold{self.fold_num}_predictions', 'wb') as f:
+                pickle.dump(self.model_predictions[kernel], f)
 
 
 
