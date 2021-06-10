@@ -231,7 +231,7 @@ class TransformerLIME(object):
                 # y_predict = predictions[idx]
                 num_words = len(re.split("\W+", tweet))
                 startt = time.process_time() # to track how long it takes for LIME to form the explanation
-                exp = lime_explainer.explain_instance(tweet, pipe.predict_proba, num_features = num_words)
+                exp = explainer.explain_instance(tweet, pipe.predict_proba, num_features = num_words)
                 endt = time.process_time()
                 dur = endt - startt
 
