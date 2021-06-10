@@ -15,6 +15,7 @@ import joblib
 from nltk.stem import WordNetLemmatizer
 from nltk import word_tokenize, pos_tag
 from nltk.corpus import stopwords, wordnet
+import sys
 print('loaded imports')
 
 
@@ -48,7 +49,7 @@ class Text2Embed(TransformerMixin):
         self.word_embeddings = np.load(f'./data/word_embeddings/word_embed_{model_name}.npy')
 
         # Load vocabulary list
-        with open('tweet_vocab_list', 'rb') as f:
+        with open('./data/word_embeddings/tweet_vocab_list', 'rb') as f:
             self.tweet_vocab_list = pickle.load(f)
 
         # Create vocabulary dictionary
@@ -178,6 +179,7 @@ class LatentVarLIME(object):
         self.fold_num = fold_num
         self.model_predictions = None
         self.kernels = kernels
+        self.model_name = model_name
         
         # Load data
         self.data_file = data_file
@@ -284,7 +286,9 @@ class LatentVarLIME(object):
 
 
 if __name__ == '__main__':
-    lvLIME = LatentVarLIME(kernels = ['linear'])
+    args = sys.argv
+    fold_num = int(args[1])
+    lvLIME = LatentVarLIME(fold_num = fold_num, kernels = ['linear'])
     lvLIME.main()
 
 
