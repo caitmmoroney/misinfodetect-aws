@@ -3,11 +3,11 @@ import pandas as pd
 import numpy as np
 import nltk
 import torch
-from transformers import BertModel, BertConfig, BertTokenizer
+# from transformers import BertModel, BertConfig, BertTokenizer
 from transformers import RobertaModel, RobertaConfig, RobertaTokenizer
-from transformers import ElectraModel, ElectraConfig, ElectraTokenizer
-from transformers import XLNetModel, XLNetTokenizer
-import matplotlib.pyplot as plt
+# from transformers import ElectraModel, ElectraConfig, ElectraTokenizer
+# from transformers import XLNetModel, XLNetTokenizer
+# import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 from sklearn.base import TransformerMixin
 from lime import lime_text
@@ -18,7 +18,7 @@ import re
 import pickle
 import time
 import joblib
-from multiprocessing import Process, Manager
+# from multiprocessing import Process, Manager
 print('loaded imports')
 
 def lime_results(lime_expl, lime_expl_list, lime_time_list, idx, text_data, pipe, lime_explainer):
