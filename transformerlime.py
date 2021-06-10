@@ -87,21 +87,16 @@ class Text2Embed(TransformerMixin):
         if type(new_corpus) == str:
             inputs = tokenizer(new_corpus, return_tensors="pt")
             outputs = model(**inputs)
-            print(outputs)
             last_hidden_states = outputs.last_hidden_state[0]
             mean = torch.mean(last_hidden_states, 0)
             embeddings.append(mean.detach().numpy())
 
         elif type(new_corpus) == list:
+            print(f'Length of corpus: {len(new_corpus)}\n')
             for i in range(len(new_corpus)):
-                print(f'Working on text {i+1}.')
                 text = new_corpus[i]
-                print(text)
                 inputs = tokenizer(text, return_tensors="pt")
                 outputs = model(**inputs)
-                print(type(outputs))
-                print(len(outputs))
-                print(outputs)
                 last_hidden_states = outputs.last_hidden_state[0]
                 mean = torch.mean(last_hidden_states, 0)
                 embeddings.append(mean.detach().numpy())
