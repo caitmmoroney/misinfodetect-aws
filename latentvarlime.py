@@ -268,19 +268,19 @@ class LatentVarLIME(object):
 
         for kernel in self.kernels:
             # save explanations
-            with open(f'{self.model_name}_{kernel}_explanations.pkl', 'wb') as f:
+            with open(f'{self.model_name}_{kernel}_explanations_fold{self.fold_num}.pkl', 'wb') as f:
                 pickle.dump(self.lime_explanations[kernel], f)
 
             # save explanations as lists
-            with open(f'{self.model_name}_{kernel}_explanations_aslist.pkl', 'wb') as f:
+            with open(f'{self.model_name}_{kernel}_explanations_aslist_fold{self.fold_num}.pkl', 'wb') as f:
                 pickle.dump(self.lime_list_explanations[kernel], f)
 
             # save LIME explanation time
-            with open(f'{self.model_name}_{kernel}_lime_time.pkl', 'wb') as f:
+            with open(f'{self.model_name}_{kernel}_lime_time_fold{self.fold_num}.pkl', 'wb') as f:
                 pickle.dump(self.lime_times[kernel], f)
 
             # save model predictions
-            with open(f'{self.model_name}_{kernel}_fold{self.fold_num}_predictions', 'wb') as f:
+            with open(f'{self.model_name}_{kernel}_predictions_fold{self.fold_num}.pkl', 'wb') as f:
                 pickle.dump(self.model_predictions[kernel], f)
 
 
