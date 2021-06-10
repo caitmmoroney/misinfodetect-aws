@@ -226,8 +226,7 @@ class TransformerLIME(object):
                 idx = index_vals[i]
                 
                 # compute lime explanation
-                #tweet = text_data['Tweet'][idx]
-                tweet = text_data
+                tweet = subset_text[idx]
                 # y_true = targets[idx]
                 # y_predict = predictions[idx]
                 num_words = len(re.split("\W+", tweet))
