@@ -21,23 +21,6 @@ import joblib
 # from multiprocessing import Process, Manager
 print('loaded imports')
 
-def lime_results(lime_expl, lime_expl_list, lime_time_list, idx, text_data, pipe, lime_explainer):
-    # compute lime explanation
-    #tweet = text_data['Tweet'][idx]
-    tweet = text_data
-    # y_true = targets[idx]
-    # y_predict = predictions[idx]
-    num_words = len(re.split("\W+", tweet))
-    startt = time.process_time() # to track how long it takes for LIME to form the explanation
-    exp = lime_explainer.explain_instance(tweet, pipe.predict_proba, num_features = num_words)
-    endt = time.process_time()
-    dur = endt - startt
-
-    # save explanations
-    lime_time_list.append(dur)
-    lime_expl.append((idx, exp))
-    lime_expl_list.append((idx, exp.as_list()))
-
 
 class Text2Embed(TransformerMixin):
     """ Description:
