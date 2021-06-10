@@ -86,6 +86,7 @@ class Text2Embed(TransformerMixin):
         for text in new_corpus:
             inputs = tokenizer(text, return_tensors="pt")
             outputs = model(**inputs)
+            print(outputs)
             last_hidden_states = outputs.last_hidden_state[0]
             mean = torch.mean(last_hidden_states, 0)
             embeddings.append(mean.detach().numpy())
